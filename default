@@ -1,0 +1,33 @@
+# /etc/nginx/sites-available/default  -------------> location of the file
+
+server {
+    listen 80;
+
+    server_name ec2-13-126-108-68.ap-south-1.compute.amazonaws.com;
+
+    root /var/www/frontend;
+    index index.html;
+
+    location / {
+        try_files $uri /index.html;
+    }
+
+    # proxy API requests to backend
+    location /api/ {
+        # dont forget the /api at the end, else when called /api/user/me backend gets /user/me
+        proxy_pass http://localhost:8080/api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # this is to ensure nginx will not interfere with oauth2 request, if this is not there
+    # frontend will be redirected to oauato2/code/google instead of login/oauth2/code/google
+    location /api/oauth2/ {
+        proxy_pass http://localhost:8080/oauth2/;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    }
+}
