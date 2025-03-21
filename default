@@ -8,7 +8,8 @@ server {
     root /var/www/frontend;
     index index.html;
 
-    location / {
+    location {
+        include /etc/nginx/India_ips.conf;
         try_files $uri /index.html;
     }
 
